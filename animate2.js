@@ -35,32 +35,29 @@ function measureRefreshRate() {
     function checkFrame() {
         frames++;
         const now = performance.now();
+
         if (now - startTime >= 1000) {
             hzElement.textContent = frames;
             frames = 0;
             startTime = now;
         }
+        
         requestAnimationFrame(checkFrame);
     }
     requestAnimationFrame(checkFrame);
 }
 
-// анимация движения вправо
+// Анимация движения вправо (с разной герцовкой монитора разное время анимации)
 function animate(time) {
     if (!isAnimating) return;
 
-    // время прошедшее с предыдущего кадра
-    const deltaTime = (time - animationStartTime)/1000;
-    animationStartTime = time;
+    const elapsedTime = time - animationStartTime;
 
-    const speed = 100; // 100 пикселей в секунду
-    const marginLeft = parseFloat((deltaTime * speed).toFixed(10)); // шаг в пикселях (скорость * время)
-    const currMarginLeft = parseFloat(parseFloat(window.getComputedStyle(animateEl).marginLeft).toFixed(10)); //текущая позиция
-    const marginLeftChange = marginLeft + currMarginLeft; //новая позиция
+    const marginLeft = Math.min(elapsedTime * 0.1, 500);
 
-    animateEl.style.marginLeft = `${marginLeftChange}px`;
+    animateEl.style.marginLeft = `${marginLeft}px`;
 
-    if (marginLeftChange < 500) {
+    if (marginLeft < 500) {
         animationFrameId = requestAnimationFrame(animate);
         return;
     }
@@ -70,17 +67,16 @@ function animate(time) {
     cancelAnimationFrame(animationFrameId);
 }
 
-// старт анимации по нажатию кнопки
 startBtn.addEventListener('click', () => {
     if (!isAnimating) {
         isAnimating = true;
         animationStartTime = performance.now();
         startTime = performance.now();
-        animateEl.style.marginLeft = "0px";
+        
         requestAnimationFrame(animate);
         setInterval(() => {
             if (isAnimating) {
-                updateTimer();
+                updateTimer();  // обновляем таймер каждый интервал
             }
         }, 10);
     }

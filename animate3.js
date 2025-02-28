@@ -6,7 +6,7 @@ const startBtn = document.querySelector('.start');
 
 let startTime = performance.now();
 let animationStartTime = performance.now();
-let animationFrameId = null;
+const duration = 5000;
 
 let isAnimating = false;
 
@@ -15,7 +15,6 @@ let finalTime = 0;
 // Таймер
 function updateTimer() {
     if (!isAnimating) {
-        // Если анимация закончена, показываем финальное время
         const elapsedTime = (finalTime / 1000).toFixed(2);
         timerElement.textContent = elapsedTime;
         
@@ -45,29 +44,17 @@ function measureRefreshRate() {
     requestAnimationFrame(checkFrame);
 }
 
-// анимация движения вправо
-function animate(time) {
-    if (!isAnimating) return;
-
-    // время прошедшее с предыдущего кадра
-    const deltaTime = (time - animationStartTime)/1000;
-    animationStartTime = time;
-
-    const speed = 100; // 100 пикселей в секунду
-    const marginLeft = parseFloat((deltaTime * speed).toFixed(10)); // шаг в пикселях (скорость * время)
-    const currMarginLeft = parseFloat(parseFloat(window.getComputedStyle(animateEl).marginLeft).toFixed(10)); //текущая позиция
-    const marginLeftChange = marginLeft + currMarginLeft; //новая позиция
-
-    animateEl.style.marginLeft = `${marginLeftChange}px`;
-
-    if (marginLeftChange < 500) {
-        animationFrameId = requestAnimationFrame(animate);
+function animate() {
+    const value = (performance.now() - animationStartTime) / duration;
+    if (value < 1) {
+        animateEl.style.marginLeft = `${value * 500}px`;
+        requestAnimationFrame((t) => animate(t));
         return;
     }
-
+    
+    animateEl.style.marginLeft = '500px';
     isAnimating = false;
-    finalTime = time - startTime;
-    cancelAnimationFrame(animationFrameId);
+    finalTime = performance.now() - animationStartTime;
 }
 
 // старт анимации по нажатию кнопки
